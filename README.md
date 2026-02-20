@@ -1,6 +1,6 @@
 # Python Calculator - fastapi-calculator-devops-pipeline
 
-![CI Pipeline](https://github.com/earthinversion/CICD_workflow/actions/workflows/ci.yml/badge.svg)
+![CI Pipeline](https://github.com/earthinversion/fastapi-calculator-devops-pipeline/actions/workflows/ci.yml/badge.svg)
 
 I built this project to learn and demonstrate a complete **Dev → CI → Monitor** workflow
 using real industry tools. I kept the application intentionally simple (a calculator)
@@ -415,11 +415,10 @@ packages between runs, so repeated builds are significantly faster.
 
 ### Status badge
 
-After pushing to GitHub, the pipeline status appears as a badge at the top of
-this README. Replace `<your-username>` in the badge URL with the actual GitHub username:
+The pipeline status badge is already live at the top of this README, pointing to:
 
 ```
-![CI Pipeline](https://github.com/<your-username>/CICD_workflow/actions/workflows/ci.yml/badge.svg)
+![CI Pipeline](https://github.com/earthinversion/fastapi-calculator-devops-pipeline/actions/workflows/ci.yml/badge.svg)
 ```
 
 ### How to activate it
