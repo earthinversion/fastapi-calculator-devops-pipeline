@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CI/CD Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 60px auto; }
+    h1   { text-align: center; }
+    form { display: flex; flex-direction: column; gap: 10px; }
+    input, select, button { padding: 8px; font-size: 1rem; }
+    button { background: #0078d4; color: white; border: none; cursor: pointer; }
+    .result { margin-top: 20px; font-size: 1.2rem; text-align: center; }
+    .error  { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Calculator</h1>
+  <form method="POST">
+    <input  type="number" name="a" placeholder="First number"  step="any" required>
+    <select name="operation">
+      <option value="add">Add (+)</option>
+      <option value="subtract">Subtract (−)</option>
+      <option value="multiply">Multiply (×)</option>
+      <option value="divide">Divide (÷)</option>
+    </select>
+    <input  type="number" name="b" placeholder="Second number" step="any" required>
+    <button type="submit">Calculate</button>
+  </form>
+
+  {% if result is not none %}
+    <p class="result" id="result">Result: <strong>{{ result }}</strong></p>
+  {% endif %}
+  {% if error %}
+    <p class="result error" id="error">Error: {{ error }}</p>
+  {% endif %}
+</body>
+</html>

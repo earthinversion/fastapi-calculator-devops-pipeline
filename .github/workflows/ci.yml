@@ -1,0 +1,82 @@
+# GitHub Actions CI Pipeline
+#
+# Runs automatically on every push to main and on every pull request.
+# Mirrors the same stages as the Jenkinsfile:
+#   Code Checkout → Build → Unit Tests → UI Tests → Integration Complete
+#
+# Key difference from Jenkins:
+#   - No server to maintain — GitHub runs this in the cloud for free
+#   - Chrome is pre-installed on ubuntu-latest, so Selenium tests run natively
+#   - Jobs are split so UI tests only run if unit tests pass first
+
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ── JOB 1: Build & Unit Tests ───────────────────────────────────────────────
+  # Fast feedback loop — no browser, finishes in seconds.
+  build-and-unit-test:
+    name: Build & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: "pip"   # cache pip downloads between runs for speed
+
+      - name: Build — Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Unit Tests
+        run: pytest tests/test_calculator.py -v --tb=short
+
+  # ── JOB 2: UI Tests (Selenium) ──────────────────────────────────────────────
+  # Only runs after Job 1 passes. Uses headless Chrome on the GitHub runner.
+  ui-tests:
+    name: UI Tests (Selenium + Chrome)
+    runs-on: ubuntu-latest
+    needs: build-and-unit-test   # blocks until Job 1 is green
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Installs matching Chrome + ChromeDriver on the runner automatically
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      - name: UI Tests
+        run: pytest tests/test_selenium.py -v --tb=short
+
+  # ── JOB 3: Integration Complete ─────────────────────────────────────────────
+  # Final confirmation gate — both previous jobs must be green.
+  integration-complete:
+    name: Integration Complete
+    runs-on: ubuntu-latest
+    needs: [build-and-unit-test, ui-tests]
+
+    steps:
+      - name: All checks passed
+        run: echo "Pipeline green — ready to deploy!"

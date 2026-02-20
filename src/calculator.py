@@ -1,0 +1,22 @@
+"""
+Core calculator logic.
+This module is the heart of the app — pure Python, no dependencies.
+"""
+
+
+def add(a, b):
+    return a + b
+
+
+def subtract(a, b):
+    return a - b
+
+
+def multiply(a, b):
+    return a * b
+
+
+def divide(a, b):
+    if b == 0:
+        raise ValueError("Cannot divide by zero")
+    return a / b

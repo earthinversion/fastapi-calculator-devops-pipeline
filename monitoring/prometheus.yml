@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s       # pull metrics from targets every 15 seconds
+  evaluation_interval: 15s   # evaluate alerting rules every 15 seconds
+
+scrape_configs:
+
+  # Scrape Prometheus itself (useful for debugging)
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Scrape the FastAPI calculator app
+  # /metrics is exposed automatically by prometheus-fastapi-instrumentator
+  - job_name: "fastapi-calculator"
+    static_configs:
+      - targets: ["app:5000"]   # "app" = service name in docker-compose
+    metrics_path: "/metrics"

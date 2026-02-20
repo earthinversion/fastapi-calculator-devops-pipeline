@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+*.egg-info/
+
+# Test artifacts
+.pytest_cache/
+test-results/
+
+# OS
+.DS_Store
+.claude
+CLAUDE.md
+AGENTS.md

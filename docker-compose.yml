@@ -1,0 +1,60 @@
+# Three services that form the monitoring stack:
+#
+#  ┌─────────────┐    scrapes /metrics    ┌──────────────┐
+#  │  calculator │ ──────────────────────► │  prometheus  │
+#  │  (FastAPI)  │                         │              │
+#  └─────────────┘                         └──────┬───────┘
+#  host:5001 → container:5000                     │ queries
+#  (5001 avoids conflict with `make run` on 5000)
+#                                                 ▼
+#                                          ┌──────────────┐
+#                                          │   grafana    │
+#                                          │  dashboards  │
+#                                          └──────────────┘
+#                                               :3000
+
+services:
+
+  # ── 1. FastAPI Calculator App ──────────────────────────────────────────────
+  app:
+    build: .
+    container_name: calculator-app
+    ports:
+      - "5001:5000"   # host:5001 → container:5000 (avoids conflict with local make run)
+    # Grafana dashboard link & Prometheus labels
+    labels:
+      - "prometheus.scrape=true"
+
+  # ── 2. Prometheus ──────────────────────────────────────────────────────────
+  # Scrapes /metrics from the FastAPI app every 15 seconds
+  # and stores the data as time-series in its local TSDB.
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"   # allows hot-reload via POST /-/reload
+    depends_on:
+      - app
+
+  # ── 3. Grafana ─────────────────────────────────────────────────────────────
+  # Reads data from Prometheus and renders dashboards.
+  # Pre-configured via provisioning files (no manual setup needed).
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
